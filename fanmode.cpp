@@ -1,4 +1,3 @@
-#include <cstdlib>
 #include <format>
 #include <fstream>
 #include <ostream>
@@ -23,6 +22,31 @@ int FanSpeed(std::string path) {
     std::println(stderr, "WEARECOOKED");
     return 1;
   }
+  return -1;
+}
+
+bool FanConf() {
+  // 0 = full
+  // 1 = automatic
+  std::ifstream Fan(std::format("{}/pwm1_enable", path));
+  if (Fan.is_open()) {
+    bool fan_config;
+    Fan >> fan_config;
+    if (fan_config) {
+      return 1;
+    } else if (!fan_config) {
+      return 0;
+    }
+  } else {
+    std::println(stderr,
+                 "Could not read config of state of fan. Check pwm1_enable.");
+  }
+  return 1;
+}
+
+void opt_s() {
+  std::println("Fan Speed: {} rpm", FanSpeed(path));
+  std::println("Fan Config: {}", (FanConf() ? "Automatic" : "Full"));
 }
 
 int check_for_opts(int argc, char **argv) {
@@ -59,7 +83,7 @@ int main(int argc, char **argv) {
   }
   switch (check_for_opts(argc, argv)) {
   case 0:
-    std::println("Fan Speed: {} rpm", FanSpeed(path));
+    opt_s();
     // case 1:
     //   // change fan speed to full
     // case 2:
